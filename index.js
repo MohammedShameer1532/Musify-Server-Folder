@@ -74,7 +74,7 @@ passport.deserializeUser((user, done) => {
 
 // initial google ouath login
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-app.get("https://musify-server-three.vercel.app/auth/google/callback", passport.authenticate("google", {
+app.get("/auth/google/callback", passport.authenticate("google", {
   successRedirect: "https://musify-client-three.vercel.app/home",
   failureRedirect: "https://musify-client-three.vercel.app"
 }))
