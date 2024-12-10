@@ -18,7 +18,7 @@ const userDb = require('./Model/schema')
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "https://musify-client-three.vercel.app",
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
@@ -75,8 +75,8 @@ passport.deserializeUser((user, done) => {
 // initial google ouath login
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 app.get("/auth/google/callback", passport.authenticate("google", {
-  successRedirect: "http://localhost:5173/home",
-  failureRedirect: "http://localhost:5137"
+  successRedirect: "https://musify-client-three.vercel.app/home",
+  failureRedirect: "https://musify-client-three.vercel.app"
 }))
 
 
@@ -133,7 +133,7 @@ app.post('/login', async (req, res) => {
 app.get('/logout', (req, res, next) => {
   req.logout(function (err) {
     if (err) { return next(err) }
-    res.redirect("http://localhost:5173");
+    res.redirect("https://musify-client-three.vercel.app");
   })
 })
 
