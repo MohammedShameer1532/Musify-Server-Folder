@@ -145,6 +145,19 @@ app.get('/login/success', (req, res) => {
   }
 });
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  console.log("Headers:", req.headers);
+  console.log("Session:", req.session);
+  console.log("User:", req.user);
+  next();
+});
+
+
+
+app.get('/', (req, res) => {
+  res.send('Welcome to the Musify API!');
+});
 
 
 app.listen(PORT, () => {
