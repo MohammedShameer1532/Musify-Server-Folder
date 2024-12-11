@@ -27,15 +27,15 @@ app.use(express.json());
 app.use(cookieParser())
 
 //setup session
-app.use(session({ 
-  secret: "dfhdshdfjklas12323kdf7789", 
-  resave: false, 
-  saveUninitialized: false, 
-  store: MongoStore.create({ 
-    mongoUrl: process.env.DATABASE, 
-    ttl: 14 * 24 * 60 * 60 }), 
-    cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 24 * 60 * 60 * 1000, 
-          }))
+app.use(session
+        ({ secret: "dfhdshdfjklas12323kdf7789",
+           resave: false, 
+           saveUninitialized: false, 
+           store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI, 
+           ttl: 14 * 24 * 60 * 60}), 
+           cookie: { secure: process.env.NODE_ENV === 'production', 
+           httpOnly: true, maxAge: 24 * 60 * 60 * 1000,
+                  }, }));
 //setup passport
 app.use(passport.initialize())
 app.use(passport.session())
