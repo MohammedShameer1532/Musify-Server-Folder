@@ -36,7 +36,7 @@ app.use(session({
   store: MongoStore.create({ mongoUrl: process.env.DATABASE, ttl: 14 * 24 * 60 * 60 }),
   cookie: {
     secure: process.env.NODE_ENV === 'production',  // Ensure this is set to true in production
-    httpOnly: true,
+    httpOnly: false,
     maxAge: 24 * 60 * 60 * 1000
   },
 }));
@@ -164,8 +164,12 @@ app.get('/login/success', (req, res) => {
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
+  console.log("Headers:", req.headers);
+  console.log("Session:", req.session);
+  console.log("User:", req.user);
   next();
 });
+
 
 
 app.get('/', (req, res) => {
