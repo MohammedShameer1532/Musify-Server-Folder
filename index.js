@@ -16,7 +16,7 @@ const cookieParser = require('cookie-parser')
 const userDb = require('./Model/schema')
 
 
-
+console.log(process.env) 
 // Middleware
 app.use(cors({
   origin: "http://localhost:5173",
@@ -73,11 +73,17 @@ passport.use(
 )
 
 passport.serializeUser((user, done) => {
-  done(null, user)
-})
-passport.deserializeUser((user, done) => {
-  done(null, user)
-})
+  done(null, user._id); // Store only the ID in the session
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await userDb.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});
 
 
 // initial google ouath login
