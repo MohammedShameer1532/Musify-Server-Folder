@@ -18,28 +18,41 @@ const userDb = require('./Model/schema')
 
 console.log(process.env) 
 // Middleware
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'https://your-frontend-domain.vercel.app'
+];
+
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: function(origin, callback) {
+    if (!origin || ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
+  credentials: true
 }));
+
 app.use(express.json());
 app.use(cookieParser())
 
 //setup session
 app.use(session({
-  secret: "dfhdshdfjklas12323kdf7789", // Replace with a secure secret
+  secret: process.env.SESSION_SECRET || "dfhdshdfjklas12323kdf7789",
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.DATABASE, // Ensure MongoDB URL is correct
+    mongoUrl: process.env.DATABASE,
+    ttl: 24 * 60 * 60 // Session TTL in seconds (1 day)
   }),
   cookie: {
-    secure: process.env.NODE_ENV === 'production',  // Use HTTPS in production only
-    sameSite: 'None', // Allow cross-origin cookies (important for local dev)
-    httpOnly: true,   // Prevent client-side access to cookies (security)
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
-  },
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }));
 
 
@@ -51,7 +64,7 @@ passport.use(
   new oAuth2Strategy({
     clientID: ClientId,
     clientSecret: ClientSecret,
-    callbackURL: "https://musify-server-three.vercel.app/auth/google/callback",
+    callbackURL: process.env.NODE_ENV === 'production' ? 'https://musify-server-three.vercel.app/auth/google/callback' : 'http://localhost:5000/auth/google/callback',
     scope: ["profile", "email"]
   }, async (accessToken, refreshToken, profile, done) => {
     try {
@@ -160,6 +173,10 @@ app.get('/login/success', (req, res) => {
   } else {
     res.status(401).json({ message: "Not Authorized" });
   }
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
 });
 
 
