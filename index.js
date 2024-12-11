@@ -29,7 +29,12 @@ app.use(cookieParser())
 app.use(session({
   secret: "dfhdshdfjklas12323kdf7789",
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true, // Prevent access to cookies via JavaScript
+    secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+    sameSite: "none", // Enable cross-origin cookies
+  },
 }))
 
 //setup passport
@@ -145,6 +150,9 @@ app.get('/logout', (req, res, next) => {
 })
 
 app.get('/login/success', (req, res) => {
+  console.log("Cookies:", req.cookies);
+  console.log("Session Data:", req.session);
+  console.log("User:", req.user);
   if (req.user) {
     res.status(200).json({ message: "User successfully logged in", user: req.user });
   } else {
