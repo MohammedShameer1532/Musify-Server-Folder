@@ -65,11 +65,18 @@ passport.use(
 )
 
 passport.serializeUser((user, done) => {
-  done(null, user)
-})
-passport.deserializeUser((user, done) => {
-  done(null, user)
-})
+  done(null, user.id); // Only store the user ID in the session
+});
+
+passport.deserializeUser(async (id, done) => {
+  console.log("Session user:", req.user);
+  try {
+    const user = await userDb.findById(id); // Fetch user from the database
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
 
 
 // initial google ouath login
