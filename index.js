@@ -145,6 +145,11 @@ app.get('/login/success', (req, res) => {
   }
 });
 
+app.use((req, res, next) => {
+  console.log('Welcome! A new request received.');
+  next(); // Proceed to the next middleware or route handler
+});
+
 
 
 app.listen(PORT, () => {
