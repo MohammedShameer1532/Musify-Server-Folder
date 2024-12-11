@@ -4,7 +4,6 @@ dotenv.config();
 const express = require('express');
 const cors = require('cors');
 require('./db/database');
-const MongoStore = require('connect-mongo');
 const session = require('express-session');
 const passport = require('passport');
 const oAuth2Strategy = require('passport-google-oauth20').Strategy;
@@ -16,45 +15,22 @@ const cookieParser = require('cookie-parser')
 const userDb = require('./Model/schema')
 
 
-console.log(process.env) 
+
 // Middleware
-const ALLOWED_ORIGINS = [
-  'http://localhost:5173',
-  'https://your-frontend-domain.vercel.app'
-];
-
 app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin || ALLOWED_ORIGINS.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: "http://localhost:5173",
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
+  credentials: true,
 }));
-
 app.use(express.json());
 app.use(cookieParser())
 
 //setup session
 app.use(session({
-  secret: process.env.SESSION_SECRET || "dfhdshdfjklas12323kdf7789",
+  secret: "dfhdshdfjklas12323kdf7789",
   resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.DATABASE,
-    ttl: 24 * 60 * 60 // Session TTL in seconds (1 day)
-  }),
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000
-  }
-}));
-
+  saveUninitialized: true
+}))
 
 //setup passport
 app.use(passport.initialize())
@@ -64,7 +40,7 @@ passport.use(
   new oAuth2Strategy({
     clientID: ClientId,
     clientSecret: ClientSecret,
-    callbackURL: process.env.NODE_ENV === 'production' ? 'https://musify-server-three.vercel.app/auth/google/callback' : 'http://localhost:5000/auth/google/callback',
+    callbackURL: "/auth/google/callback",
     scope: ["profile", "email"]
   }, async (accessToken, refreshToken, profile, done) => {
     try {
@@ -89,24 +65,18 @@ passport.use(
 )
 
 passport.serializeUser((user, done) => {
-  done(null, user._id); // Store only the ID in the session
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await userDb.findById(id);
-    done(null, user);
-  } catch (err) {
-    done(err, null);
-  }
-});
+  done(null, user)
+})
+passport.deserializeUser((user, done) => {
+  done(null, user)
+})
 
 
 // initial google ouath login
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 app.get("/auth/google/callback", passport.authenticate("google", {
   successRedirect: "http://localhost:5173/home",
-  failureRedirect: "http://localhost:5173"
+  failureRedirect: "http://localhost:5137"
 }))
 
 
@@ -173,10 +143,6 @@ app.get('/login/success', (req, res) => {
   } else {
     res.status(401).json({ message: "Not Authorized" });
   }
-});
-
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK' });
 });
 
 
