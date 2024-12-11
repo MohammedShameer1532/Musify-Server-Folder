@@ -4,7 +4,7 @@ dotenv.config();
 const express = require('express');
 const cors = require('cors');
 require('./db/database');
-const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const passport = require('passport');
 const oAuth2Strategy = require('passport-google-oauth20').Strategy;
 const app = express();
@@ -29,8 +29,11 @@ app.use(cookieParser())
 app.use(session({
   secret: "dfhdshdfjklas12323kdf7789",
   resave: false,
-  saveUninitialized: true
-}))
+  saveUninitialized: true,
+  store: MongoStore.create({
+    mongoUrl: process.env.DATABASE,
+  }),
+}));
 
 //setup passport
 app.use(passport.initialize())
