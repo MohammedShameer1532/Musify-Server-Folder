@@ -28,17 +28,20 @@ app.use(cookieParser())
 
 //setup session
 app.use(session({
-  secret: "dfhdshdfjklas12323kdf7789", // Replace with a secure secret in production
+  secret: "dfhdshdfjklas12323kdf7789", // Replace with a secure secret
   resave: false,
   saveUninitialized: true,
   store: MongoStore.create({
-    mongoUrl: process.env.DATABASE,
+    mongoUrl: process.env.DATABASE, // Ensure MongoDB URL is correct
   }),
   cookie: {
-    secure: false, // Set to true in production if using HTTPS
+    secure: process.env.NODE_ENV === 'production',  // Use HTTPS in production only
+    sameSite: 'None', // Allow cross-origin cookies (important for local dev)
+    httpOnly: true,   // Prevent client-side access to cookies (security)
     maxAge: 24 * 60 * 60 * 1000, // 1 day
   },
 }));
+
 
 //setup passport
 app.use(passport.initialize())
