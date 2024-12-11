@@ -18,7 +18,7 @@ const userDb = require('./Model/schema')
 
 // Middleware
 app.use(cors({
-  origin: "https://musify-client-eta.vercel.app",
+  origin: "http://localhost:5173",
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
@@ -40,7 +40,7 @@ passport.use(
   new oAuth2Strategy({
     clientID: ClientId,
     clientSecret: ClientSecret,
-    callbackURL: "https://musify-server-three.vercel.app/auth/google/callback",
+    callbackURL: "/auth/google/callback",
     scope: ["profile", "email"]
   }, async (accessToken, refreshToken, profile, done) => {
     try {
@@ -75,8 +75,8 @@ passport.deserializeUser((user, done) => {
 // initial google ouath login
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 app.get("/auth/google/callback", passport.authenticate("google", {
-  successRedirect: "https://musify-client-eta.vercel.app/home",
-  failureRedirect: "https://musify-client-eta.vercel.app"
+  successRedirect: "http://localhost:5173/home",
+  failureRedirect: "http://localhost:5173"
 }))
 
 
@@ -133,7 +133,7 @@ app.post('/login', async (req, res) => {
 app.get('/logout', (req, res, next) => {
   req.logout(function (err) {
     if (err) { return next(err) }
-    res.redirect("https://musify-client-eta.vercel.app");
+    res.redirect("http://localhost:5173");
   })
 })
 
