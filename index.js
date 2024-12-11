@@ -73,8 +73,10 @@ passport.serializeUser((user, done) => {
   done(null, user.id); // Only store the user ID in the session
 });
 
-passport.deserializeUser(async (id, done) => {
-  console.log("Session user:", req.user);
+passport.deserializeUser(async (user, done) => {
+    console.log("Session ID:", id); 
+    console.log("Session user:",user); 
+  console.log("Session :", req.user);
   try {
     const user = await userDb.findById(id); // Fetch user from the database
     done(null, user);
