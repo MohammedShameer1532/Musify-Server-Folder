@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 require('./db/database');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const passport = require('passport');
 const oAuth2Strategy = require('passport-google-oauth20').Strategy;
 const app = express();
@@ -26,12 +27,15 @@ app.use(express.json());
 app.use(cookieParser())
 
 //setup session
-app.use(session({
-  secret: "dfhdshdfjklas12323kdf7789",
-  resave: false,
-  saveUninitialized: true
-}))
-
+app.use(session({ 
+  secret: "dfhdshdfjklas12323kdf7789", 
+  resave: false, 
+  saveUninitialized: false, 
+  store: MongoStore.create({ 
+    mongoUrl: process.env.DATABASE, 
+    ttl: 14 * 24 * 60 * 60 }), 
+    cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 24 * 60 * 60 * 1000, 
+          }))
 //setup passport
 app.use(passport.initialize())
 app.use(passport.session())
@@ -151,7 +155,6 @@ app.get('/login/success', (req, res) => {
     res.status(401).json({ message: "Not Authorized" });
   }
 });
-
 
 
 app.listen(PORT, () => {
