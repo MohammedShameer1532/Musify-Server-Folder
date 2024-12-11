@@ -16,26 +16,28 @@ const cookieParser = require('cookie-parser')
 const userDb = require('./Model/schema')
 
 
-
-// Middleware
-app.use(cors({
+const corsOptions = {
   origin: "http://localhost:5173",
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
-}));
+  optionsSuccessStatus: 200
+}
+app.options("",cors(corsOptions))
+// Middleware
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser())
 
 //setup session
 app.use(session({
   secret: "dfhdshdfjklas12323kdf7789",
-  resave: false, 
-  saveUninitialized: false, 
-  store: MongoStore.create({ mongoUrl: process.env.DATABASE, ttl: 14 * 24 * 60 * 60 }), 
-  cookie: { 
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.DATABASE, ttl: 14 * 24 * 60 * 60 }),
+  cookie: {
     secure: process.env.NODE_ENV === 'production',  // Ensure this is set to true in production
-    httpOnly: true, 
-    maxAge: 24 * 60 * 60 * 1000 
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
   },
 }));
 
@@ -130,7 +132,7 @@ app.post('/login', async (req, res) => {
     if (!user || user.password !== password) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-    
+
     req.login(user, (err) => {
       if (err) return res.status(500).json({ message: "Login failed" });
       res.cookie("sessionSecret", "dfhdshdfjklas12323kdf7789", {
