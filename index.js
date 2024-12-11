@@ -35,7 +35,7 @@ app.use(session({
     mongoUrl: process.env.DATABASE,
   }),
   cookie: {
-    secure: true, // Set to true in production if using HTTPS
+    secure: false, // Set to true in production if using HTTPS
     maxAge: 24 * 60 * 60 * 1000, // 1 day
   },
 }));
