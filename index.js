@@ -5,7 +5,6 @@ const express = require('express');
 const cors = require('cors');
 require('./db/database');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
 const passport = require('passport');
 const oAuth2Strategy = require('passport-google-oauth20').Strategy;
 const app = express();
@@ -16,15 +15,13 @@ const cookieParser = require('cookie-parser')
 const userDb = require('./Model/schema')
 
 
-const corsOptions = {
+
+// Middleware
+app.use(cors({
   origin: "http://localhost:5173",
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
-  optionsSuccessStatus: 200
-}
-app.options("",cors(corsOptions))
-// Middleware
-app.use(cors(corsOptions));
+}));
 app.use(express.json());
 app.use(cookieParser())
 
@@ -32,14 +29,8 @@ app.use(cookieParser())
 app.use(session({
   secret: "dfhdshdfjklas12323kdf7789",
   resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: process.env.DATABASE, ttl: 14 * 24 * 60 * 60 }),
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',  // Ensure this is set to true in production
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000
-  },
-}));
+  saveUninitialized: true
+}))
 
 //setup passport
 app.use(passport.initialize())
@@ -49,7 +40,7 @@ passport.use(
   new oAuth2Strategy({
     clientID: ClientId,
     clientSecret: ClientSecret,
-    callbackURL: "https://musify-server-three.vercel.app/auth/google/callback",
+    callbackURL: "/auth/google/callback",
     scope: ["profile", "email"]
   }, async (accessToken, refreshToken, profile, done) => {
     try {
@@ -74,19 +65,11 @@ passport.use(
 )
 
 passport.serializeUser((user, done) => {
-  console.log('Serialized user:', user);  // Log serialized user
-  done(null, user.id);  // Serialize by user ID
-});
-
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await userDb.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
-});
+  done(null, user)
+})
+passport.deserializeUser((user, done) => {
+  done(null, user)
+})
 
 
 // initial google ouath login
@@ -132,7 +115,7 @@ app.post('/login', async (req, res) => {
     if (!user || user.password !== password) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-
+    
     req.login(user, (err) => {
       if (err) return res.status(500).json({ message: "Login failed" });
       res.cookie("sessionSecret", "dfhdshdfjklas12323kdf7789", {
@@ -162,15 +145,6 @@ app.get('/login/success', (req, res) => {
   }
 });
 
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
-
-
-app.get('/', (req, res) => {
-  res.send('Welcome to the Musify API!');
-});
 
 
 app.listen(PORT, () => {
